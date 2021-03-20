@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -129,7 +130,7 @@ public class Collecting {
                 .collect(Collectors.joining());
     }
 
-    public Object printableStringCollector() {
-        return null;
+    public Collector<CourseResult, Table, String> printableStringCollector() {
+        return new TableCollector();
     }
 }
