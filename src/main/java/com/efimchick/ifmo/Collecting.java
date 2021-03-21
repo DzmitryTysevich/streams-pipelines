@@ -4,6 +4,7 @@ import com.efimchick.ifmo.util.CourseResult;
 import com.efimchick.ifmo.util.Person;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -131,6 +132,17 @@ public class Collecting {
     }
 
     public Collector<CourseResult, Table, String> printableStringCollector() {
-        return new TableCollector();
+        return Collector.of(
+                Table::new,
+                Table::addCourseResult,
+                (table, table2) -> {
+                    throw new UnsupportedOperationException("Cannot be performed in parallel");
+                },
+                table -> {
+                    StringBuilder builder = new StringBuilder();
+                    table.createTable(builder);
+                    return builder.toString();
+                }
+        );
     }
 }
