@@ -8,12 +8,24 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class Collecting {
+
+    private final Map<Predicate<Double>, String> marksMapping = new HashMap<>();
+
+    public Collecting() {
+        marksMapping.put((aDouble) -> aDouble > 90.0, "A");
+        marksMapping.put((aDouble) -> aDouble < 90.0 && aDouble >= 83.0, "B");
+        marksMapping.put((aDouble) -> aDouble < 83.0 && aDouble >= 75.0, "C");
+        marksMapping.put((aDouble) -> aDouble < 75.0 && aDouble >= 68.0, "D");
+        marksMapping.put((aDouble) -> aDouble < 68.0 && aDouble >= 60.0, "E");
+        marksMapping.put((aDouble) -> aDouble < 60.0, "F");
+    }
 
     public int sum(IntStream stream) {
         return stream.sum();
@@ -103,21 +115,16 @@ public class Collecting {
     public Map<Person, String> defineMarks(Stream<CourseResult> courseResult) {
         Map<Person, Double> map = totalScores(courseResult);
         Map<Person, String> stringMap = new HashMap<>();
-        map.forEach((person, aDouble) -> {
-            if (aDouble > 90.0)
-                stringMap.put(person, "A");
-            if (aDouble < 90.0 && aDouble >= 83.0)
-                stringMap.put(person, "B");
-            if (aDouble < 83.0 && aDouble >= 75.0)
-                stringMap.put(person, "C");
-            if (aDouble < 75.0 && aDouble >= 68.0)
-                stringMap.put(person, "D");
-            if (aDouble < 68.0 && aDouble >= 60.0)
-                stringMap.put(person, "E");
-            if (aDouble < 60.0)
-                stringMap.put(person, "F");
-        });
+        map.forEach((person, aDouble) -> stringMap.put(person, getMark(aDouble)));
         return stringMap;
+    }
+
+    private String getMark(Double aDouble) {
+        return marksMapping.entrySet().stream()
+                .filter(entry -> entry.getKey().test(aDouble))
+                .map(Map.Entry::getValue)
+                .findFirst()
+                .orElseThrow();
     }
 
     public String easiestTask(Stream<CourseResult> courseResult) {
